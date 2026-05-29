@@ -85,41 +85,7 @@ def signup(
         "message":"created"
     }
 
-    existing = db.query(User).filter(
-        User.email == user.email
-    ).first()
-
-
-    if existing:
-
-        raise HTTPException(
-            status_code=400,
-            detail="Email exists"
-        )
-
-
-    new_user = User(
-
-        email=user.email,
-
-        password=hash_password(
-            user.password
-        ),
-
-        role=user.role
-    )
-
-
-    db.add(new_user)
-
-    db.commit()
-
-
-    return {
-        "message":"created"
-    }
-
-
+    
 
 # login
 
@@ -170,7 +136,8 @@ def login(
     token=create_access_token(
         {
         "sub":user.email,
-        "role":user.role
+        "role":user.role,
+        "id":user.id
         }
     )
 
@@ -210,6 +177,9 @@ def get_current_user(
 
         return {
 
+        "id":
+        payload.get("id"),
+        
         "email":
         payload.get("sub"),
 

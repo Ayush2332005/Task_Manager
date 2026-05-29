@@ -43,23 +43,16 @@ def get_db():
 
 @router.post("/")
 def create_task(
-
     task:TaskCreate,
-
-    db:Session=Depends(
-        get_db
-    ),
-
-    user=Depends(
-        get_current_user
-    )
-
+    db:Session=Depends(get_db),
+    user=Depends(get_current_user)
 ):
-
 
     new_task=Task(
 
-        title=task.title
+        title=task.title,
+
+        user_id=user["id"]
 
     )
 
@@ -71,12 +64,9 @@ def create_task(
 
     return {
 
-        "message":
-        "Task created"
+        "message":"Task created"
 
     }
-
-
 
 
 # get all tasks
@@ -94,8 +84,10 @@ def get_tasks(
 ):
 
 
-    tasks=db.query(
-        Task
+    tasks=db.query(Task).filter(
+
+        Task.user_id==user["id"]
+
     ).all()
 
 
