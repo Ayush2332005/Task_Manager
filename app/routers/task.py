@@ -2,7 +2,7 @@ from fastapi import (
     APIRouter,
     Depends
 )
-
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 
@@ -92,3 +92,68 @@ def get_tasks(
 
 
     return tasks
+
+@router.put("/{task_id}")
+def update_task(
+    task_id:int,
+    task:TaskCreate,
+    db:Session=Depends(get_db),
+    user=Depends(get_current_user)
+):
+
+
+    existing_task=db.query(Task).filter(
+
+        Task.id==task_id,
+
+        Task.user_id==user["id"]
+
+    ).first()
+
+
+    if not existing_task:
+
+        raise HTTPException(
+            404,
+            "Task not found"
+        )
+
+
+    existing_task.title=task.title
+
+    db.commit()
+    return {
+        "message":"Task updated"
+    }   
+
+@router.delete("/{task_id}")
+def delete_task(
+    task_id:int,
+    db:Session=Depends(get_db),
+    user=Depends(get_current_user)
+):
+
+
+    existing_task=db.query(Task).filter(
+
+        Task.id==task_id,
+
+        Task.user_id==user["id"]
+
+    ).first()
+
+
+    if not existing_task:
+
+        raise HTTPException(
+            404,
+            "Task not found"
+        )
+
+
+    db.delete(existing_task)
+
+    db.commit()
+    return {
+        "message":"Task deleted"
+    }
